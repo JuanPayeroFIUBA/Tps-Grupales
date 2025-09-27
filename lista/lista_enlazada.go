@@ -12,11 +12,18 @@ type listaEnlazada[T any] struct {
 }
 
 type IterListaEnlazada[T any] struct {
-	actual    *nodoLista[T]
-	siguiente *nodoLista[T]
+	actual   *nodoLista[T]
+	anterior *nodoLista[T]
 }
 
 const lista_vacia = "La lista esta vacia"
+const panic_iteracion_completada = "El iterador termino de iterar"
+
+func nodoCrear[T any](dato T) *nodoLista[T] {
+	nodo := new(nodoLista[T])
+	nodo.dato = dato
+	return nodo
+}
 
 func CrearListaEnlazada[T any]() Lista[T] {
 	lista := new(listaEnlazada[T])
@@ -27,40 +34,74 @@ func CrearListaEnlazada[T any]() Lista[T] {
 func (lista listaEnlazada[T]) EstaVacia() bool {
 	return lista.largo == 0
 }
-func (lista listaEnlazada[T]) InsertarPrimero(T) {
-}
-func (lista listaEnlazada[T]) InsertarUltimo(T) {
 
+func (lista *listaEnlazada[T]) InsertarPrimero(elem T) {
+	nuevo := nodoCrear(elem)
+	if lista.EstaVacia() {
+		lista.ultimo = nuevo
+	} else {
+		nuevo.siguiente = lista.primero
+	}
+	lista.primero = nuevo
+	lista.largo++
 }
+
+func (lista *listaEnlazada[T]) InsertarUltimo(elem T) {
+	nuevo := nodoCrear(elem)
+	if lista.EstaVacia() {
+		lista.primero = nuevo
+	} else {
+		lista.ultimo.siguiente = nuevo
+	}
+	lista.ultimo = nuevo
+	lista.largo++
+}
+
 func (lista *listaEnlazada[T]) BorrarPrimero() T {
 	if lista.EstaVacia() {
 		panic(lista_vacia)
 	}
 	eliminado := lista.primero.dato
 	lista.primero = lista.primero.siguiente
+	if lista.primero == nil {
+		lista.ultimo = nil
+	}
 	lista.largo--
 	return eliminado
 }
+
 func (lista listaEnlazada[T]) VerPrimero() T {
 	if lista.EstaVacia() {
 		panic(lista_vacia)
 	}
 	return lista.primero.dato
 }
+
 func (lista listaEnlazada[T]) VerUltimo() T {
 	if lista.EstaVacia() {
 		panic(lista_vacia)
 	}
 	return lista.ultimo.dato
 }
+
 func (lista listaEnlazada[T]) Largo() int {
 	return lista.largo
 }
-func (lista listaEnlazada[T]) Iterar(visitar func(T) bool) {
 
+func (lista listaEnlazada[T]) Iterar(visitar func(T) bool) {
+	actual := lista.primero
+	for actual != nil {
+		if !visitar(actual.dato) {
+			return
+		}
+		actual = actual.siguiente
+	}
 }
-func (lista listaEnlazada[T]) Iterador() IteradorLista[T] {
+
+func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
 	iterador := new(IterListaEnlazada[T])
+	iterador.actual = lista.primero
+	iterador.anterior = nil
 	return iterador
 }
 
@@ -69,19 +110,32 @@ func (iter IterListaEnlazada[T]) HaySiguiente() bool {
 }
 
 func (iter *IterListaEnlazada[T]) Siguiente() {
-	iter.actual = iter.siguiente
+	if !iter.HaySiguiente() {
+		panic(panic_iteracion_completada)
+	}
+	iter.anterior = iter.actual
+	iter.actual = iter.actual.siguiente
 }
 
 func (iter IterListaEnlazada[T]) VerActual() T {
+	if !iter.HaySiguiente() {
+		panic(panic_iteracion_completada)
+	}
 	return iter.actual.dato
 }
 
 func (iter *IterListaEnlazada[T]) Borrar() T {
+	if !iter.HaySiguiente() {
+		panic(panic_iteracion_completada)
+	}
 	eliminado := iter.actual.dato
-	iter.actual.dato = nil //aca hay error, vercomo solucionarlo
+	iter.anterior.siguiente = iter.actual.siguiente
+	iter.actual = iter.actual.siguiente
 	return eliminado
 }
 
 func (iter *IterListaEnlazada[T]) Insertar(elem T) {
-	iter.actual.dato = elem
+	nuevo := nodoCrear(elem)
+	nuevo.siguiente = iter.actual
+	iter.anterior.siguiente = nuevo
 }
