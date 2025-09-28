@@ -131,8 +131,16 @@ func (iter *IterListaEnlazada[T]) Borrar() T {
 		panic(panic_iteracion_completada)
 	}
 	eliminado := iter.actual.dato
-	iter.anterior.siguiente = iter.actual.siguiente
+	if iter.anterior == nil {
+		iter.lista.primero = iter.actual.siguiente
+	} else {
+		iter.anterior.siguiente = iter.actual.siguiente
+	}
+	if iter.actual == iter.lista.ultimo {
+		iter.lista.ultimo = iter.anterior
+	}
 	iter.actual = iter.actual.siguiente
+	iter.lista.largo--
 	return eliminado
 }
 
