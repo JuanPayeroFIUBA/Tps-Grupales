@@ -10,6 +10,7 @@ import (
 )
 
 const lista_vacia = "La lista esta vacia"
+const panic_iteracion_completada = "El iterador termino de iterar"
 const test_volumen_1 = 100000
 const test_volumen_2 = 1000000
 const test_mitad_volumen_1 = 50000
@@ -353,4 +354,75 @@ func TestVolumenMasGrandeInsertarPrimeroYUltimoYViendoElPrimero(t *testing.T) {
 		lista.BorrarPrimero()
 	}
 	require.True(t, lista.EstaVacia())
+}
+
+// /////////////////////////
+// Tests de Iterador Interno
+// /////////////////////////
+
+func TestIteradorInternoSoloUnaIteracion(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.Iterar(func(i int) bool {
+		return false
+	})
+	require.True(t, lista.EstaVacia())
+}
+func TestVolumenConIteradorInterno(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.Iterar(func(i int) bool {
+		if i < test_volumen_1 {
+			lista.InsertarPrimero(i)
+			i++
+			return true
+		}
+		return false
+	})
+	lista.Iterar(func(i int) bool {
+		if i > 0 {
+			lista.BorrarPrimero()
+			i--
+			return true
+		}
+		return false
+	})
+	require.True(t, lista.EstaVacia())
+}
+
+// /////////////////////////
+// Tests de Iterador Externo
+// /////////////////////////
+func TestIteradorExternoEnListaRecienCreada(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	iter := lista.Iterador()
+	require.PanicsWithValue(t, panic_iteracion_completada, func() { iter.Siguiente() })
+}
+
+func TestIteradorExternoRecienCreado(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarPrimero(5)
+	lista.InsertarPrimero(6)
+	lista.InsertarPrimero(7)
+	lista.InsertarPrimero(999)
+	iter := lista.Iterador()
+	require.EqualValues(t, 999, iter.VerActual())
+}
+
+func TestIteradorExternoInsertarEnPosicionEnLaQueSeCreaElIterador(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	iter := lista.Iterador()
+	iter.Insertar(60)
+	require.EqualValues(t, 60, lista.VerPrimero())
+	require.EqualValues(t, 60, iter.VerActual())
+
+}
+func TestIteradorExternoInsertarEnPosicionEnLaQueSeCreaElIteradorConListaNoVacia(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	iter := lista.Iterador()
+	lista.InsertarPrimero(6)
+	lista.InsertarPrimero(7)
+	lista.InsertarPrimero(999)
+	iter.Insertar(60)
+	require.EqualValues(t, 60, lista.VerPrimero())
+	require.EqualValues(t, 60, iter.VerActual())
+
 }
