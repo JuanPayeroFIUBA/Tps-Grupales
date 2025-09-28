@@ -14,6 +14,7 @@ type listaEnlazada[T any] struct {
 type IterListaEnlazada[T any] struct {
 	actual   *nodoLista[T]
 	anterior *nodoLista[T]
+	lista    *listaEnlazada[T]
 }
 
 const lista_vacia = "La lista esta vacia"
@@ -102,6 +103,7 @@ func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
 	iterador := new(IterListaEnlazada[T])
 	iterador.actual = lista.primero
 	iterador.anterior = nil
+	iterador.lista = lista
 	return iterador
 }
 
@@ -129,13 +131,36 @@ func (iter *IterListaEnlazada[T]) Borrar() T {
 		panic(panic_iteracion_completada)
 	}
 	eliminado := iter.actual.dato
-	iter.anterior.siguiente = iter.actual.siguiente
+	if iter.anterior == nil {
+		iter.lista.primero = iter.actual.siguiente
+	} else {
+		iter.anterior.siguiente = iter.actual.siguiente
+	}
+	if iter.actual == iter.lista.ultimo {
+		iter.lista.ultimo = iter.anterior
+	}
 	iter.actual = iter.actual.siguiente
+	iter.lista.largo--
 	return eliminado
 }
 
+// como se podria modificar la cantidad?, quiza agregando referencia a la lista a la que vamos?
 func (iter *IterListaEnlazada[T]) Insertar(elem T) {
 	nuevo := nodoCrear(elem)
-	nuevo.siguiente = iter.actual
-	iter.anterior.siguiente = nuevo
+	if iter.anterior == nil {
+		nuevo.siguiente = iter.lista.primero
+		iter.lista.primero = nuevo
+		if iter.lista.largo == 0 {
+			iter.lista.ultimo = nuevo
+		}
+	} else {
+		nuevo.siguiente = iter.actual
+		iter.anterior.siguiente = nuevo
+		if iter.actual == nil {
+			iter.lista.ultimo = nuevo
+		}
+		//iter.anterior = nuevo
+	}
+	iter.actual = nuevo
+	iter.lista.largo++
 }
