@@ -3,11 +3,6 @@ package diccionario
 //fuente de la funcion de hashing:
 //https://pkg.go.dev/hash/fnv@go1.25.1
 
-import (
-	"fmt"
-	"hash/fnv"
-)
-
 type Estado int
 
 const (
@@ -39,15 +34,6 @@ type IteradorDiccionario[K any, V comparable] struct {
 	posicion_actual int
 }
 
-func convertirABytes[K any](clave K) []byte {
-	return []byte(fmt.Sprintf("%v", clave))
-}
-func fnvHash[K any](clave K, m uint64) uint64 {
-	h := fnv.New64a()
-	h.Write(convertirABytes(clave))
-	return h.Sum64() % m
-}
-
 func CrearHash[K any, V comparable](funcion_igualdad func(K, K) bool) Diccionario[K, V] {
 	nuevo := new(HashCerrado[K, V])
 	nuevo.funcion_igualdad_hash = funcion_igualdad
@@ -55,42 +41,6 @@ func CrearHash[K any, V comparable](funcion_igualdad func(K, K) bool) Diccionari
 	nuevo.cantidad = 0
 	nuevo.capacidad = 3
 	return nuevo
-}
-
-func hash_obtener[K any, V comparable](clave K, hash HashCerrado[K, V]) (int, bool) {
-	ubicacion := int(fnvHash(clave, uint64(hash.capacidad)))
-	celda_actual := hash.tabla[ubicacion]
-	contador := 0
-
-	for {
-		celda_actual = hash.tabla[ubicacion]
-		if celda_actual.estado == VACIO {
-			return ubicacion, false
-		}
-		if celda_actual.estado == OCUPADO && hash.funcion_igualdad_hash(celda_actual.clave, clave) {
-			return ubicacion, true
-		}
-		contador++
-		if contador == hash.capacidad {
-			return ubicacion, false
-		}
-		ubicacion = (ubicacion + 1) % hash.capacidad
-	}
-}
-
-func (hash *HashCerrado[K, V]) redimensionar(nueva_capacidad int) {
-	tabla_a_redimensionar := hash.tabla
-	tabla_redimensionada := make([]celdaHash[K, V], nueva_capacidad)
-	hash.tabla = tabla_redimensionada
-	hash.cantidad = 0
-	hash.capacidad = nueva_capacidad
-	hash.cantidad_borrados = 0
-
-	for _, celda := range tabla_a_redimensionar {
-		if celda.estado == OCUPADO {
-			hash.Guardar(celda.clave, celda.valor)
-		}
-	}
 }
 
 func (hash HashCerrado[K, V]) Cantidad() int {
@@ -149,16 +99,6 @@ func (hash HashCerrado[K, V]) Iterar(visitar func(K, V) bool) {
 	}
 }
 
-func (iter *IteradorDiccionario[K, V]) buscarProximaPosicionOcupada() {
-	for iter.posicion_actual < iter.capacidad {
-		if iter.tabla[iter.posicion_actual].estado == OCUPADO {
-			return
-		}
-		iter.posicion_actual++
-	}
-	iter.posicion_actual = iter.capacidad
-}
-
 func (hash HashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 	iterador := new(IteradorDiccionario[K, V])
 	iterador.tabla = hash.tabla
@@ -176,7 +116,7 @@ func (iter IteradorDiccionario[K, V]) VerActual() (K, V) {
 	if !iter.HaySiguiente() {
 		panic(iteracion_completada)
 	}
-	clave := iter.tabla[iter.posicion_actual].clave //prolijidad che
+	clave := iter.tabla[iter.posicion_actual].clave
 	valor := iter.tabla[iter.posicion_actual].valor
 	return clave, valor
 }
