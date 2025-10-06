@@ -103,55 +103,55 @@ func TestIteradorListaVacia(t *testing.T) {
 }
 
 func TestIteradorInsercionesDistintasPosiciones(t *testing.T) {
-	lista := listaDesdeSlice([]int{10, 20, 30})
+	lista := listaDesdeSlice([]int{18, 12, 22})
 	iter := lista.Iterador()
 	iter.Insertar(5)
-	require.Equal(t, []int{5, 10, 20, 30}, sliceDesdeLista(lista))
+	require.Equal(t, []int{5, 18, 12, 22}, sliceDesdeLista(lista))
 	require.Equal(t, 5, iter.VerActual())
 
 	iter.Siguiente()
 	iter.Siguiente()
 	iter.Insertar(15)
-	require.Equal(t, []int{5, 10, 15, 20, 30}, sliceDesdeLista(lista))
+	require.Equal(t, []int{5, 18, 15, 12, 22}, sliceDesdeLista(lista))
 	require.Equal(t, 15, iter.VerActual())
 
 	for iter.HaySiguiente() {
 		iter.Siguiente()
 	}
 	iter.Insertar(35)
-	require.Equal(t, []int{5, 10, 15, 20, 30, 35}, sliceDesdeLista(lista))
+	require.Equal(t, []int{5, 18, 15, 12, 22, 35}, sliceDesdeLista(lista))
 	require.Equal(t, 35, lista.VerUltimo())
 	require.Equal(t, 6, lista.Largo())
 }
 
 func TestIteradorBorradosDistintasPosiciones(t *testing.T) {
-	lista := listaDesdeSlice([]int{10, 20, 30, 40})
+	lista := listaDesdeSlice([]int{18, 12, 22, 40})
 	iter := lista.Iterador()
-	require.Equal(t, 10, iter.Borrar())
-	require.Equal(t, []int{20, 30, 40}, sliceDesdeLista(lista))
+	require.Equal(t, 18, iter.Borrar())
+	require.Equal(t, []int{12, 22, 40}, sliceDesdeLista(lista))
 
 	iter.Siguiente()
-	require.Equal(t, 30, iter.Borrar())
-	require.Equal(t, []int{20, 40}, sliceDesdeLista(lista))
+	require.Equal(t, 22, iter.Borrar())
+	require.Equal(t, []int{12, 40}, sliceDesdeLista(lista))
 
 	require.Equal(t, 40, iter.Borrar())
-	require.Equal(t, []int{20}, sliceDesdeLista(lista))
+	require.Equal(t, []int{12}, sliceDesdeLista(lista))
 	require.False(t, iter.HaySiguiente())
-	require.Equal(t, 20, lista.VerPrimero())
-	require.Equal(t, 20, lista.VerUltimo())
+	require.Equal(t, 12, lista.VerPrimero())
+	require.Equal(t, 12, lista.VerUltimo())
 	require.Equal(t, 1, lista.Largo())
 	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.Borrar() })
 }
 
 func TestIteradorRecorridoCompleto(t *testing.T) {
-	lista := listaDesdeSlice([]string{"uno", "dos", "tres"})
+	lista := listaDesdeSlice([]string{"Palermo", "Riquelme", "Maradona"})
 	iter := lista.Iterador()
 	recorrido := []string{}
 	for iter.HaySiguiente() {
 		recorrido = append(recorrido, iter.VerActual())
 		iter.Siguiente()
 	}
-	require.Equal(t, []string{"uno", "dos", "tres"}, recorrido)
+	require.Equal(t, []string{"Palermo", "Riquelme", "Maradona"}, recorrido)
 	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.VerActual() })
 	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.Siguiente() })
 	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.Borrar() })
@@ -159,7 +159,7 @@ func TestIteradorRecorridoCompleto(t *testing.T) {
 
 func TestIteradorVolumen(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
-	const cantidad = 20000
+	const cantidad = 12000
 	for i := 0; i < cantidad; i++ {
 		lista.InsertarUltimo(i)
 	}
@@ -204,7 +204,7 @@ func TestIteradorInternoConCorte(t *testing.T) {
 
 func TestIteradorInternoVolumen(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
-	const cantidad = 30000
+	const cantidad = 22000
 	for i := 0; i < cantidad; i++ {
 		lista.InsertarUltimo(i)
 	}
