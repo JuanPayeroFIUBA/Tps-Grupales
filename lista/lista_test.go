@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	msj_lista1_vacia       = "La lista esta vacia"
+	msj_lista_vacia        = "La lista esta vacia"
 	msj_iterador_terminado = "El iterador termino de iterar"
 )
 
@@ -17,9 +17,9 @@ func TestListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	require.True(t, lista.EstaVacia())
 	require.Equal(t, 0, lista.Largo())
-	require.PanicsWithValue(t, msj_lista1_vacia, func() { lista.VerPrimero() })
-	require.PanicsWithValue(t, msj_lista1_vacia, func() { lista.VerUltimo() })
-	require.PanicsWithValue(t, msj_lista1_vacia, func() { lista.BorrarPrimero() })
+	require.PanicsWithValue(t, msj_lista_vacia, func() { lista.VerPrimero() })
+	require.PanicsWithValue(t, msj_lista_vacia, func() { lista.VerUltimo() })
+	require.PanicsWithValue(t, msj_lista_vacia, func() { lista.BorrarPrimero() })
 }
 
 func TestInsertarPrimeroGeneraOrdenInverso(t *testing.T) {
@@ -56,7 +56,7 @@ func TestBorrarPrimeroHastaVaciar(t *testing.T) {
 	require.Equal(t, []int{1, 2, 3, 4}, salida)
 	require.True(t, lista.EstaVacia())
 	require.Equal(t, 0, lista.Largo())
-	require.PanicsWithValue(t, msj_lista1_vacia, func() { lista.BorrarPrimero() })
+	require.PanicsWithValue(t, msj_lista_vacia, func() { lista.BorrarPrimero() })
 }
 
 func TestOperacionesMixtasMantienenExtremos(t *testing.T) {
