@@ -48,43 +48,56 @@ func (hash HashCerrado[K, V]) Cantidad() int {
 }
 
 func (hash *HashCerrado[K, V]) Guardar(clave K, dato V) {
-	if factor_redimension_agrandar < (float64(hash.cantidad+hash.cantidad_borrados+1) / float64(hash.capacidad)) {
+	factor_carga := float64(hash.cantidad+hash.cantidad_borrados+1) / float64(hash.capacidad)
+	if factor_carga > factor_redimension_agrandar {
 		hash.redimensionar(2 * hash.capacidad)
 	}
-	ubicacion, encontrado := hash_obtener(clave, *hash)
-	if !encontrado {
-		hash.cantidad++
-	}
+
+	ubicacion, encontrado := buscarPosicionGuardar(clave, *hash)
+
 	if hash.tabla[ubicacion].estado == BORRADO {
 		hash.cantidad_borrados--
 	}
+
+	if !encontrado {
+		hash.cantidad++
+	}
+
 	hash.tabla[ubicacion].clave = clave
 	hash.tabla[ubicacion].valor = dato
 	hash.tabla[ubicacion].estado = OCUPADO
-
 }
 
 func (hash *HashCerrado[K, V]) Borrar(clave K) V {
-	if factor_redimension_achicar > (float64(hash.cantidad-1) / float64(hash.capacidad)) {
-		hash.redimensionar(hash.capacidad / 2)
-	}
-	ubicacion, encontrado := hash_obtener(clave, *hash)
+	ubicacion, encontrado := buscarClave(clave, *hash)
 	if !encontrado {
 		panic(panic_clave_no_encontrada)
 	}
+
+	valor := hash.tabla[ubicacion].valor
 	hash.tabla[ubicacion].estado = BORRADO
 	hash.cantidad_borrados++
 	hash.cantidad--
-	return hash.tabla[ubicacion].valor
+
+	factor_carga := float64(hash.cantidad) / float64(hash.capacidad)
+	if factor_carga < factor_redimension_achicar && hash.capacidad > 3 {
+		nueva_capacidad := hash.capacidad / 2
+		if nueva_capacidad < 3 {
+			nueva_capacidad = 3
+		}
+		hash.redimensionar(nueva_capacidad)
+	}
+
+	return valor
 }
 
 func (hash HashCerrado[K, V]) Pertenece(clave K) bool {
-	_, encontrado := hash_obtener(clave, hash)
+	_, encontrado := buscarClave(clave, hash)
 	return encontrado
 }
 
 func (hash HashCerrado[K, V]) Obtener(clave K) V {
-	ubicacion, encontrado := hash_obtener(clave, hash)
+	ubicacion, encontrado := buscarClave(clave, hash)
 	if !encontrado {
 		panic(panic_clave_no_encontrada)
 	}

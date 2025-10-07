@@ -14,25 +14,59 @@ func fnvHash[K any](clave K, m uint64) uint64 {
 	return h.Sum64() % m
 }
 
-func hash_obtener[K any, V comparable](clave K, hash HashCerrado[K, V]) (int, bool) {
+func buscarPosicionGuardar[K any, V comparable](clave K, hash HashCerrado[K, V]) (int, bool) {
 	ubicacion := int(fnvHash(clave, uint64(hash.capacidad)))
-	celda_actual := hash.tabla[ubicacion]
-	contador := 0
+	primera_borrada := -1
+	iteraciones := 0
 
-	for {
-		celda_actual = hash.tabla[ubicacion]
-		if celda_actual.estado == VACIO {
-			return ubicacion, false
-		}
-		if celda_actual.estado == OCUPADO && hash.funcion_igualdad_hash(celda_actual.clave, clave) {
+	for iteraciones < hash.capacidad {
+		celda := hash.tabla[ubicacion]
+
+		if celda.estado == OCUPADO && hash.funcion_igualdad_hash(celda.clave, clave) {
 			return ubicacion, true
 		}
-		contador++
-		if contador == hash.capacidad {
+
+		if celda.estado == BORRADO && primera_borrada == -1 {
+			primera_borrada = ubicacion
+		}
+
+		if celda.estado == VACIO {
+			if primera_borrada != -1 {
+				return primera_borrada, false
+			}
 			return ubicacion, false
 		}
+
 		ubicacion = (ubicacion + 1) % hash.capacidad
+		iteraciones++
 	}
+
+	if primera_borrada != -1 {
+		return primera_borrada, false
+	}
+	return ubicacion, false
+}
+
+func buscarClave[K any, V comparable](clave K, hash HashCerrado[K, V]) (int, bool) {
+	ubicacion := int(fnvHash(clave, uint64(hash.capacidad)))
+	iteraciones := 0
+
+	for iteraciones < hash.capacidad {
+		celda := hash.tabla[ubicacion]
+
+		if celda.estado == VACIO {
+			return -1, false
+		}
+
+		if celda.estado == OCUPADO && hash.funcion_igualdad_hash(celda.clave, clave) {
+			return ubicacion, true
+		}
+
+		ubicacion = (ubicacion + 1) % hash.capacidad
+		iteraciones++
+	}
+
+	return -1, false
 }
 
 func (hash *HashCerrado[K, V]) redimensionar(nueva_capacidad int) {
