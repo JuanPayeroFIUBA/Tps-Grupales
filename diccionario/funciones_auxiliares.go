@@ -8,13 +8,18 @@ import (
 func convertirABytes[K any](clave K) []byte {
 	return []byte(fmt.Sprintf("%v", clave))
 }
+
 func fnvHash[K any](clave K, m uint64) uint64 {
 	h := fnv.New64a()
 	h.Write(convertirABytes(clave))
 	return h.Sum64() % m
 }
 
-func hash_buscar[K any, V comparable](clave K, hash hashCerrado[K, V], queremos_guardar bool) (int, bool) {
+func crearTabla[K any, V comparable](capacidad int) []celdaHash[K, V] {
+	return make([]celdaHash[K, V], capacidad)
+}
+
+func hash_buscar[K any, V comparable](clave K, hash hashCerrado[K, V], accion_guardar bool) (int, bool) {
 	ubicacion := int(fnvHash(clave, uint64(hash.capacidad)))
 	primera_borrada := -1
 	iteraciones := 0
@@ -26,12 +31,12 @@ func hash_buscar[K any, V comparable](clave K, hash hashCerrado[K, V], queremos_
 			return ubicacion, true
 		}
 
-		if queremos_guardar && celda.estado == BORRADO && primera_borrada == -1 {
+		if accion_guardar && celda.estado == BORRADO && primera_borrada == -1 {
 			primera_borrada = ubicacion
 		}
 
 		if celda.estado == VACIO {
-			if queremos_guardar && primera_borrada != -1 {
+			if accion_guardar && primera_borrada != -1 {
 				return primera_borrada, false
 			}
 			return ubicacion, false
@@ -41,7 +46,7 @@ func hash_buscar[K any, V comparable](clave K, hash hashCerrado[K, V], queremos_
 		iteraciones++
 	}
 
-	if queremos_guardar && primera_borrada != -1 {
+	if accion_guardar && primera_borrada != -1 {
 		return primera_borrada, false
 	}
 	return ubicacion, false
@@ -49,8 +54,7 @@ func hash_buscar[K any, V comparable](clave K, hash hashCerrado[K, V], queremos_
 
 func (hash *hashCerrado[K, V]) redimensionar(nueva_capacidad int) {
 	tabla_a_redimensionar := hash.tabla
-	tabla_redimensionada := make([]celdaHash[K, V], nueva_capacidad)
-	hash.tabla = tabla_redimensionada
+	hash.tabla = crearTabla[K, V](nueva_capacidad)
 	hash.cantidad = 0
 	hash.capacidad = nueva_capacidad
 	hash.cantidad_borrados = 0

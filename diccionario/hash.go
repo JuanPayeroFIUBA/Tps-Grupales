@@ -37,7 +37,7 @@ type iteradorDiccionario[K any, V comparable] struct {
 func CrearHash[K any, V comparable](funcion_igualdad func(K, K) bool) Diccionario[K, V] {
 	nuevo := new(hashCerrado[K, V])
 	nuevo.funcion_igualdad_hash = funcion_igualdad
-	nuevo.tabla = make([]celdaHash[K, V], 3) //capacidad inicial decidida arbitrariamente en un numero primo pequenio
+	nuevo.tabla = crearTabla[K, V](3)
 	nuevo.cantidad = 0
 	nuevo.capacidad = 3
 	return nuevo
