@@ -79,7 +79,7 @@ func abb_buscar[K, V any](clave K, abb abb[K, V]) (*nodoArbol[K, V], *nodoArbol[
 	for actual != nil {
 		comparacion := abb.funcion_comparacion(clave, actual.clave)
 		if comparacion == 0 {
-			return padre, actual, false
+			return padre, actual, izquierda
 		}
 		padre = actual
 		if comparacion < 0 {
@@ -121,33 +121,6 @@ func iterarRango[K, V any](abb abb[K, V], actual *nodoArbol[K, V], desde, hasta 
 	if actual == nil {
 		return true
 	}
-	//comparacion_con_desde := 0
-	//comparacion_con_hasta := 0
-	//if desde != nil  {
-	//	comparacion_con_desde = abb.funcion_comparacion(actual.clave, *desde)
-	//}
-	//if hasta != nil {
-	//	comparacion_con_hasta = abb.funcion_comparacion(actual.clave, *hasta)
-	//}
-	//
-	//if comparacion_con_hasta > 0 {
-	//	return iterarRango(abb, actual.izq, desde, hasta, visitar)
-	//}
-	//
-	//if comparacion_con_desde >= 0 && comparacion_con_hasta <= 0 {
-	//	if !iterarRango(abb, actual.izq, desde, hasta, visitar) {
-	//		return false
-	//	}
-	//	if !visitar(actual.clave, actual.valor) {
-	//		return false
-	//	}
-	//	return iterarRango(abb, actual.der, desde, hasta, visitar)
-	//}
-	//
-	//if comparacion_con_desde < 0 {
-	//	return iterarRango(abb, actual.der, desde, hasta, visitar)
-	//}
-	//return iterarRango(abb, actual.der, desde, hasta, visitar)
 
 	if desde != nil && abb.funcion_comparacion(actual.clave, *desde) < 0 {
 		return iterarRango(abb, actual.der, desde, hasta, visitar)

@@ -81,22 +81,15 @@ func (abb *abb[K, V]) Borrar(clave K) V {
 	}
 
 	if nodo.izq != nil && nodo.der != nil {
-		menor_por_derecha, padre_menor_por_derecha := encontrarMenorPorDerecha(nodo.der, nodo_padre)
-		abb.Borrar(menor_por_derecha.clave)
+		menor_por_derecha, padre_menor := encontrarMenorPorDerecha(nodo.der, nodo)
 		nodo.clave = menor_por_derecha.clave
 		nodo.valor = menor_por_derecha.valor
-		//*menor_por_derecha, *nodo = *nodo, *menor_por_derecha
-		//borradoPreciso(padre, nodo, izquierda)
 
-		//if nodo_padre != nil {
-		//	if padre_menor_por_derecha == nodo {
-		//		padre_menor_por_derecha.der = menor_por_derecha.der
-		//	} else {
-		//		padre_menor_por_derecha.izq = menor_por_derecha.der
-		//	}
-		//} else {
-		//	nodo.der = menor_por_derecha.der
-		//}
+		if padre_menor == nodo {
+			nodo.der = menor_por_derecha.der
+		} else {
+			padre_menor.izq = menor_por_derecha.der
+		}
 		abb.cantidad--
 		return valor_eliminado
 	}
@@ -167,8 +160,6 @@ func (iter *iteradorDiccionarioOrdenado[K, V]) Siguiente() {
 		nodo = nodo.izq
 	}
 }
-
-//agregar iter por ragno
 
 func (abb abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
 	iterarRango(abb, abb.raiz, desde, hasta, visitar)
