@@ -36,9 +36,19 @@ func igualdadStringsABB(n1, n2 string) int {
 	return -1
 }
 
-//////////////////////
-//TESTS DE DICCIONARIO
-//////////////////////
+func generarClavesAleatorias(volumen int) []int {
+	claves := make([]int, volumen)
+	for i := 0; i < volumen; i++ {
+		claves[i] = i + 1
+	}
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r.Shuffle(len(claves), func(i, j int) {
+		claves[i], claves[j] = claves[j], claves[i]
+	})
+
+	return claves
+}
 
 func TestDiccionarioOrdenadoVacio(t *testing.T) {
 	t.Log("Comprueba que Diccionario vacio no tiene claves")
@@ -181,9 +191,7 @@ func TestValorNuloDiccionarioOrdenado(t *testing.T) {
 	require.False(t, abb.Pertenece(clave))
 }
 
-// //////////////////////
-// TESTS ITERADOR INTERNO
-// //////////////////////
+
 func TestClavesIteradorInternoDeDiccionarioOrdenado(t *testing.T) {
 	t.Log("Valida que todas las claves sean recorridas (y una única vez) con el iterador interno")
 	clave1 := "Gato"
@@ -268,9 +276,6 @@ func TestValoresConBorradosIteradorInternoDeDiccionarioOrdenado(t *testing.T) {
 	require.EqualValues(t, 720, factorial)
 }
 
-// //////////////////////
-// TESTS ITERADOR EXTERNO
-// //////////////////////
 
 func TestIterarDiccionarioOrdenadoVacio(t *testing.T) {
 	t.Log("Iterar sobre diccionario vacio es simplemente tenerlo al final")
@@ -447,12 +452,13 @@ func TestIteradorInternoCorteABB(t *testing.T) {
 
 	require.EqualValues(t, 5, contador)
 }
-
 func TestIterarRangoInternoABB(t *testing.T) {
 	t.Log("Prueba IterarRango con diferentes combinaciones de limites")
+
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
-	for i := 1; i <= 20; i++ {
-		abb.Guardar(i, i*10)
+	claves := generarClavesAleatorias(20)
+	for _, clave := range claves {
+		abb.Guardar(clave, clave*10)
 	}
 
 	contador := 0
@@ -516,9 +522,11 @@ func TestIterarRangoInternoABB(t *testing.T) {
 
 func TestIteradorRangoExternoABB(t *testing.T) {
 	t.Log("Prueba IteradorRango externo con diferentes limites")
+
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
-	for i := 1; i <= 15; i++ {
-		abb.Guardar(i, i*10)
+	claves := generarClavesAleatorias(15)
+	for _, clave := range claves {
+		abb.Guardar(clave, clave*10)
 	}
 
 	iter := abb.IteradorRango(nil, nil)
@@ -573,23 +581,25 @@ func TestVolumenABBInserciones(t *testing.T) {
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
 	volumen := 5000
 
-	for i := 0; i < volumen; i++ {
-		abb.Guardar(i, i*2)
+	claves := generarClavesAleatorias(volumen)
+
+	for _, k := range claves {
+		abb.Guardar(k, k*2)
 	}
 
 	require.EqualValues(t, volumen, abb.Cantidad())
 
-	for i := 0; i < volumen; i++ {
+	for i := 1; i < volumen; i++ {
 		require.True(t, abb.Pertenece(i))
 		require.EqualValues(t, i*2, abb.Obtener(i))
 	}
 
-	clave_anterior := -1
+	claveAnterior := -1
 	contador := 0
 	abb.Iterar(func(clave int, dato int) bool {
-		require.True(t, clave > clave_anterior)
+		require.True(t, clave > claveAnterior)
 		require.EqualValues(t, clave*2, dato)
-		clave_anterior = clave
+		claveAnterior = clave
 		contador++
 		return true
 	})
@@ -602,24 +612,23 @@ func TestVolumenABBBorrados(t *testing.T) {
 	abb := TDADiccionario.CrearABB[int, string](igualdadIntsABB)
 	volumen := 3000
 
-	for i := 0; i < volumen; i++ {
-		abb.Guardar(i, fmt.Sprintf("valor_%d", i))
+	claves := generarClavesAleatorias(volumen)
+	for _, k := range claves {
+		abb.Guardar(k, fmt.Sprintf("valor_%d", k))
 	}
 
 	require.EqualValues(t, volumen, abb.Cantidad())
 
-	for i := 0; i < volumen; i += 2 {
-		valor := abb.Borrar(i)
-		require.EqualValues(t, fmt.Sprintf("valor_%d", i), valor)
-		require.False(t, abb.Pertenece(i))
+	rand.Shuffle(len(claves), func(i, j int) {
+		claves[i], claves[j] = claves[j], claves[i]
+	})
+	for i := 0; i < volumen/2; i++ {
+		valor := abb.Borrar(claves[i])
+		require.EqualValues(t, fmt.Sprintf("valor_%d", claves[i]), valor)
+		require.False(t, abb.Pertenece(claves[i]))
 	}
 
-	require.EqualValues(t, volumen/2, abb.Cantidad())
-
-	for i := 1; i < volumen; i += 2 {
-		require.True(t, abb.Pertenece(i))
-		require.EqualValues(t, fmt.Sprintf("valor_%d", i), abb.Obtener(i))
-	}
+	require.EqualValues(t, (volumen+1)/2, abb.Cantidad())
 }
 
 func TestVolumenABBIteradorExterno(t *testing.T) {
@@ -627,8 +636,10 @@ func TestVolumenABBIteradorExterno(t *testing.T) {
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
 	volumen := 4000
 
-	for i := volumen; i > 0; i-- {
-		abb.Guardar(i, i*3)
+	claves := generarClavesAleatorias(volumen)
+
+	for _, k := range claves {
+		abb.Guardar(k, k*3)
 	}
 
 	iter := abb.Iterador()
@@ -652,8 +663,10 @@ func TestVolumenABBRangos(t *testing.T) {
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
 	volumen := 10000
 
-	for i := 0; i < volumen; i++ {
-		abb.Guardar(i, i)
+	claves := generarClavesAleatorias(volumen)
+
+	for _, k := range claves {
+		abb.Guardar(k, k)
 	}
 
 	desde := 2500
@@ -669,28 +682,29 @@ func TestVolumenABBRangos(t *testing.T) {
 	require.EqualValues(t, 5001, contador)
 }
 
-func TestVolumenABBReemplazos(t *testing.T) {
+func TestVolumenABBReemplazos(t *testing.T) { //al cambiar todas las pruebas de volumen a aleatorio, los reemplazos podrian o no ocurrir en cualquier momento, por lo que este test quedaria obsoleto
 	t.Log("Prueba de volumen con reemplazos de valores")
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
 	volumen := 3000
 
-	for i := 0; i < volumen; i++ {
-		abb.Guardar(i, i)
+	claves := generarClavesAleatorias(volumen)
+
+	for _, k := range claves {
+		abb.Guardar(k, k)
 	}
 
 	require.EqualValues(t, volumen, abb.Cantidad())
 
-	for i := 0; i < volumen; i++ {
-		abb.Guardar(i, i*10)
+	for _, clave := range claves {
+		abb.Guardar(clave, clave*10)
 	}
 
 	require.EqualValues(t, volumen, abb.Cantidad())
 
-	for i := 0; i < volumen; i++ {
-		require.EqualValues(t, i*10, abb.Obtener(i))
+	for _, clave := range claves {
+		require.EqualValues(t, clave*10, abb.Obtener(clave))
 	}
 }
-
 func TestABBBorrarRaiz(t *testing.T) {
 	t.Log("Prueba borrar la raiz en diferentes casos")
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
