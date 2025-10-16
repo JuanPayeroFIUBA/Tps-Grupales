@@ -122,43 +122,12 @@ func (abb abb[K, V]) Obtener(clave K) V {
 	return nodo.valor
 }
 
-func (abb abb[K, V]) Iterar(visitar func(K, V) bool) {
-	iterar(abb.raiz, visitar)
+func (abb Abb[K, V]) Iterar(visitar func(K, V) bool) {
+	abb.IterarRango(nil, nil, visitar)
 }
 
-func (abb abb[K, V]) Iterador() IterDiccionario[K, V] {
-	iterador := new(iteradorDiccionarioOrdenado[K, V])
-	actual := abb.raiz
-	iterador.pila_de_nodos = pila.CrearPilaDinamica[*nodoArbol[K, V]]()
-	for actual != nil {
-		iterador.pila_de_nodos.Apilar(actual)
-		actual = actual.izq
-	}
-	return iterador
-}
-
-func (iter iteradorDiccionarioOrdenado[K, V]) HaySiguiente() bool {
-	return !iter.pila_de_nodos.EstaVacia()
-}
-
-func (iter iteradorDiccionarioOrdenado[K, V]) VerActual() (K, V) {
-	if !iter.HaySiguiente() {
-		panic(iteracion_completada)
-	}
-	nodo := iter.pila_de_nodos.VerTope()
-	return nodo.clave, nodo.valor
-}
-
-func (iter *iteradorDiccionarioOrdenado[K, V]) Siguiente() {
-	if !iter.HaySiguiente() {
-		panic(iteracion_completada)
-	}
-	actual := iter.pila_de_nodos.Desapilar()
-	nodo := actual.der
-	for nodo != nil {
-		iter.pila_de_nodos.Apilar(nodo)
-		nodo = nodo.izq
-	}
+func (abb Abb[K, V]) Iterador() IterDiccionario[K, V] {
+	return abb.IteradorRango(nil, nil)
 }
 
 func (abb abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
