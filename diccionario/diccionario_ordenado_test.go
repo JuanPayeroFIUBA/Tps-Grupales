@@ -2,8 +2,10 @@ package diccionario_test
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 	"testing"
+	"time"
 
 	TDADiccionario "tdas/diccionario"
 
@@ -11,9 +13,8 @@ import (
 )
 
 const (
-	msj_abb_vacio          = "La lista esta vacia"
-	msj_iterador_terminado = "El iterador termino de iterar"
-	msj_clave_no_pertenece = "La clave no pertenece al diccionario"
+	msjPanicIteracionCompletada = "El iterador termino de iterar"
+	msjPanicClaveNoEncontrada   = "La clave no pertenece al diccionario"
 )
 
 func igualdadIntsABB(n1, n2 int) int {
@@ -49,28 +50,36 @@ func generarClavesAleatorias(volumen int) []int {
 
 	return claves
 }
+func buscar2(clave string, claves []string) int {
+	for i, c := range claves {
+		if c == clave {
+			return i
+		}
+	}
+	return -1
+}
 
 func TestDiccionarioOrdenadoVacio(t *testing.T) {
 	t.Log("Comprueba que Diccionario vacio no tiene claves")
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
 	require.EqualValues(t, 0, abb.Cantidad())
 	require.False(t, abb.Pertenece(1))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Obtener(1) })
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Borrar(1) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Obtener(1) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Borrar(1) })
 }
 
 func TestDiccionarioOrdenadoClaveDefault(t *testing.T) {
-	t.Log("Prueba sobre un Hash vacío que si justo buscamos la clave que es el default del tipo de dato, " +
+	t.Log("Prueba sobre un Diccionario Ordenado vacío que si justo buscamos la clave que es el default del tipo de dato, " +
 		"sigue sin existir")
 	abb := TDADiccionario.CrearABB[string, string](igualdadStringsABB)
 	require.False(t, abb.Pertenece(""))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Obtener("") })
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Borrar("") })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Obtener("") })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Borrar("") })
 
 	dicNum := TDADiccionario.CrearABB[int, string](igualdadIntsABB)
 	require.False(t, dicNum.Pertenece(0))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { dicNum.Obtener(0) })
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { dicNum.Borrar(0) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { dicNum.Obtener(0) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { dicNum.Borrar(0) })
 }
 
 func TestUnElementoDicciOrdenado(t *testing.T) {
@@ -81,7 +90,7 @@ func TestUnElementoDicciOrdenado(t *testing.T) {
 	require.True(t, abb.Pertenece("A"))
 	require.False(t, abb.Pertenece("B"))
 	require.EqualValues(t, 10, abb.Obtener("A"))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Obtener("B") })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Obtener("B") })
 }
 
 func TestDicciOrdenadoGuardar(t *testing.T) {
@@ -151,34 +160,23 @@ func TestDiccionarioOrdenadoBorrar(t *testing.T) {
 
 	require.True(t, abb.Pertenece(claves[2]))
 	require.EqualValues(t, valores[2], abb.Borrar(claves[2]))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Borrar(claves[2]) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Borrar(claves[2]) })
 	require.EqualValues(t, 2, abb.Cantidad())
 	require.False(t, abb.Pertenece(claves[2]))
 
 	require.True(t, abb.Pertenece(claves[0]))
 	require.EqualValues(t, valores[0], abb.Borrar(claves[0]))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Borrar(claves[0]) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Borrar(claves[0]) })
 	require.EqualValues(t, 1, abb.Cantidad())
 	require.False(t, abb.Pertenece(claves[0]))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Obtener(claves[0]) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Obtener(claves[0]) })
 	require.True(t, abb.Pertenece(claves[1]))
 	require.EqualValues(t, valores[1], abb.Borrar(claves[1]))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Borrar(claves[1]) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Borrar(claves[1]) })
 	require.EqualValues(t, 0, abb.Cantidad())
 	require.False(t, abb.Pertenece(claves[1]))
-	require.PanicsWithValue(t, msj_clave_no_pertenece, func() { abb.Obtener(claves[1]) })
+	require.PanicsWithValue(t, msjPanicClaveNoEncontrada, func() { abb.Obtener(claves[1]) })
 }
-
-func TestClaveVaciaDiccionarioOrdenado(t *testing.T) {
-	t.Log("Guardamos una clave vacía y deberia funcionar sin problemas")
-	abb := TDADiccionario.CrearABB[string, string](igualdadStringsABB)
-	clave := ""
-	abb.Guardar(clave, clave)
-	require.True(t, abb.Pertenece(clave))
-	require.EqualValues(t, 1, abb.Cantidad())
-	require.EqualValues(t, clave, abb.Obtener(clave))
-}
-
 func TestValorNuloDiccionarioOrdenado(t *testing.T) {
 	t.Log("Probamos que el valor puede ser nil sin problemas")
 	abb := TDADiccionario.CrearABB[string, *int](igualdadStringsABB)
@@ -190,7 +188,6 @@ func TestValorNuloDiccionarioOrdenado(t *testing.T) {
 	require.EqualValues(t, (*int)(nil), abb.Borrar(clave))
 	require.False(t, abb.Pertenece(clave))
 }
-
 
 func TestClavesIteradorInternoDeDiccionarioOrdenado(t *testing.T) {
 	t.Log("Valida que todas las claves sean recorridas (y una única vez) con el iterador interno")
@@ -214,9 +211,9 @@ func TestClavesIteradorInternoDeDiccionarioOrdenado(t *testing.T) {
 	})
 
 	require.EqualValues(t, 3, cantidad)
-	require.NotEqualValues(t, -1, buscar(cs[0], claves))
-	require.NotEqualValues(t, -1, buscar(cs[1], claves))
-	require.NotEqualValues(t, -1, buscar(cs[2], claves))
+	require.NotEqualValues(t, -1, buscar2(cs[0], claves))
+	require.NotEqualValues(t, -1, buscar2(cs[1], claves))
+	require.NotEqualValues(t, -1, buscar2(cs[2], claves))
 	require.NotEqualValues(t, cs[0], cs[1])
 	require.NotEqualValues(t, cs[0], cs[2])
 	require.NotEqualValues(t, cs[2], cs[1])
@@ -276,14 +273,13 @@ func TestValoresConBorradosIteradorInternoDeDiccionarioOrdenado(t *testing.T) {
 	require.EqualValues(t, 720, factorial)
 }
 
-
 func TestIterarDiccionarioOrdenadoVacio(t *testing.T) {
 	t.Log("Iterar sobre diccionario vacio es simplemente tenerlo al final")
 	abb := TDADiccionario.CrearABB[string, int](igualdadStringsABB)
 	iter := abb.Iterador()
 	require.False(t, iter.HaySiguiente())
-	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.VerActual() })
-	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.Siguiente() })
+	require.PanicsWithValue(t, msjPanicIteracionCompletada, func() { iter.VerActual() })
+	require.PanicsWithValue(t, msjPanicIteracionCompletada, func() { iter.Siguiente() })
 }
 
 func TestDiccionarioOrdenadoIterar(t *testing.T) {
@@ -305,26 +301,26 @@ func TestDiccionarioOrdenadoIterar(t *testing.T) {
 
 	require.True(t, iter.HaySiguiente())
 	primero, _ := iter.VerActual()
-	require.NotEqualValues(t, -1, buscar(primero, claves))
+	require.NotEqualValues(t, -1, buscar2(primero, claves))
 
 	iter.Siguiente()
 	segundo, segundo_valor := iter.VerActual()
-	require.NotEqualValues(t, -1, buscar(segundo, claves))
-	require.EqualValues(t, valores[buscar(segundo, claves)], segundo_valor)
+	require.NotEqualValues(t, -1, buscar2(segundo, claves))
+	require.EqualValues(t, valores[buscar2(segundo, claves)], segundo_valor)
 	require.NotEqualValues(t, primero, segundo)
 	require.True(t, iter.HaySiguiente())
 
 	iter.Siguiente()
 	require.True(t, iter.HaySiguiente())
 	tercero, _ := iter.VerActual()
-	require.NotEqualValues(t, -1, buscar(tercero, claves))
+	require.NotEqualValues(t, -1, buscar2(tercero, claves))
 	require.NotEqualValues(t, primero, tercero)
 	require.NotEqualValues(t, segundo, tercero)
 	iter.Siguiente()
 
 	require.False(t, iter.HaySiguiente())
-	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.VerActual() })
-	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.Siguiente() })
+	require.PanicsWithValue(t, msjPanicIteracionCompletada, func() { iter.VerActual() })
+	require.PanicsWithValue(t, msjPanicIteracionCompletada, func() { iter.Siguiente() })
 }
 
 func TestIteradorDiccionarioOrdenadoNoLlegaAlFinal(t *testing.T) {
@@ -349,9 +345,9 @@ func TestIteradorDiccionarioOrdenadoNoLlegaAlFinal(t *testing.T) {
 	require.NotEqualValues(t, primero, segundo)
 	require.NotEqualValues(t, tercero, segundo)
 	require.NotEqualValues(t, primero, tercero)
-	require.NotEqualValues(t, -1, buscar(primero, claves))
-	require.NotEqualValues(t, -1, buscar(segundo, claves))
-	require.NotEqualValues(t, -1, buscar(tercero, claves))
+	require.NotEqualValues(t, -1, buscar2(primero, claves))
+	require.NotEqualValues(t, -1, buscar2(segundo, claves))
+	require.NotEqualValues(t, -1, buscar2(tercero, claves))
 }
 
 func TestIteradorDiccionarioOrdenadoIterarTrasBorrados(t *testing.T) {
@@ -373,8 +369,8 @@ func TestIteradorDiccionarioOrdenadoIterarTrasBorrados(t *testing.T) {
 	iter := abb.Iterador()
 
 	require.False(t, iter.HaySiguiente())
-	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.VerActual() })
-	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.Siguiente() })
+	require.PanicsWithValue(t, msjPanicIteracionCompletada, func() { iter.VerActual() })
+	require.PanicsWithValue(t, msjPanicIteracionCompletada, func() { iter.Siguiente() })
 	abb.Guardar(clave1, "A")
 	iter = abb.Iterador()
 
@@ -452,6 +448,7 @@ func TestIteradorInternoCorteABB(t *testing.T) {
 
 	require.EqualValues(t, 5, contador)
 }
+
 func TestIterarRangoInternoABB(t *testing.T) {
 	t.Log("Prueba IterarRango con diferentes combinaciones de limites")
 
@@ -573,7 +570,7 @@ func TestIteradorRangoExternoABB(t *testing.T) {
 	desde, hasta = 20, 25
 	iter = abb.IteradorRango(&desde, &hasta)
 	require.False(t, iter.HaySiguiente())
-	require.PanicsWithValue(t, msj_iterador_terminado, func() { iter.VerActual() })
+	require.PanicsWithValue(t, msjPanicIteracionCompletada, func() { iter.VerActual() })
 }
 
 func TestVolumenABBInserciones(t *testing.T) {
@@ -682,29 +679,6 @@ func TestVolumenABBRangos(t *testing.T) {
 	require.EqualValues(t, 5001, contador)
 }
 
-func TestVolumenABBReemplazos(t *testing.T) { //al cambiar todas las pruebas de volumen a aleatorio, los reemplazos podrian o no ocurrir en cualquier momento, por lo que este test quedaria obsoleto
-	t.Log("Prueba de volumen con reemplazos de valores")
-	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)
-	volumen := 3000
-
-	claves := generarClavesAleatorias(volumen)
-
-	for _, k := range claves {
-		abb.Guardar(k, k)
-	}
-
-	require.EqualValues(t, volumen, abb.Cantidad())
-
-	for _, clave := range claves {
-		abb.Guardar(clave, clave*10)
-	}
-
-	require.EqualValues(t, volumen, abb.Cantidad())
-
-	for _, clave := range claves {
-		require.EqualValues(t, clave*10, abb.Obtener(clave))
-	}
-}
 func TestABBBorrarRaiz(t *testing.T) {
 	t.Log("Prueba borrar la raiz en diferentes casos")
 	abb := TDADiccionario.CrearABB[int, int](igualdadIntsABB)

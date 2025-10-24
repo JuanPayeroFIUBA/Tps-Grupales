@@ -10,10 +10,15 @@ const (
 	OCUPADO
 	BORRADO
 )
-const factor_redimension_achicar = 0.3
-const factor_redimension_agrandar = 0.7
-const iteracion_completada = "El iterador termino de iterar"
-const panic_clave_no_encontrada = "La clave no pertenece al diccionario"
+const (
+	capacidadInicial            = 7
+	factorRedimAchicar          = 0.3
+	divisorCapacidadHash        = 2
+	factorRedimAgrandar         = 0.7
+	multipicadorCapacidadHash   = 2
+	msjPanicIteracionCompletada = "El iterador termino de iterar"
+	msjPanicClaveNoEncontrada   = "La clave no pertenece al diccionario"
+)
 
 type hashCerrado[K any, V comparable] struct {
 	tabla                 []celdaHash[K, V]
@@ -37,9 +42,9 @@ type iteradorDiccionario[K any, V comparable] struct {
 func CrearHash[K any, V comparable](funcion_igualdad func(K, K) bool) Diccionario[K, V] {
 	nuevo := new(hashCerrado[K, V])
 	nuevo.funcion_igualdad_hash = funcion_igualdad
-	nuevo.tabla = make([]celdaHash[K, V], 3)
+	nuevo.tabla = make([]celdaHash[K, V], capacidadInicial)
 	nuevo.cantidad = 0
-	nuevo.capacidad = 3
+	nuevo.capacidad = capacidadInicial
 	return nuevo
 }
 
@@ -48,9 +53,9 @@ func (hash hashCerrado[K, V]) Cantidad() int {
 }
 
 func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
-	factor_carga := float64(hash.cantidad+hash.cantidad_borrados+1) / float64(hash.capacidad)
-	if factor_carga > factor_redimension_agrandar {
-		hash.redimensionar(2 * hash.capacidad)
+	factor_carga := float64(hash.cantidad+hash.cantidad_borrados) / float64(hash.capacidad)
+	if factor_carga > factorRedimAgrandar {
+		hash.redimensionar(multipicadorCapacidadHash * hash.capacidad)
 	}
 
 	ubicacion, encontrado := hash_buscar(clave, *hash, true)
@@ -71,7 +76,7 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 func (hash *hashCerrado[K, V]) Borrar(clave K) V {
 	ubicacion, encontrado := hash_buscar(clave, *hash, false)
 	if !encontrado {
-		panic(panic_clave_no_encontrada)
+		panic(msjPanicClaveNoEncontrada)
 	}
 
 	valor := hash.tabla[ubicacion].valor
@@ -80,11 +85,9 @@ func (hash *hashCerrado[K, V]) Borrar(clave K) V {
 	hash.cantidad--
 
 	factor_carga := float64(hash.cantidad) / float64(hash.capacidad)
-	if factor_carga < factor_redimension_achicar && hash.capacidad > 3 {
-		nueva_capacidad := hash.capacidad / 2
-		if nueva_capacidad < 3 {
-			nueva_capacidad = 3
-		}
+	if factor_carga < factorRedimAchicar && hash.capacidad > capacidadInicial {
+		nueva_capacidad := hash.capacidad / divisorCapacidadHash
+		nueva_capacidad = max(nueva_capacidad, capacidadInicial)
 		hash.redimensionar(nueva_capacidad)
 	}
 
@@ -99,7 +102,7 @@ func (hash hashCerrado[K, V]) Pertenece(clave K) bool {
 func (hash hashCerrado[K, V]) Obtener(clave K) V {
 	ubicacion, encontrado := hash_buscar(clave, hash, false)
 	if !encontrado {
-		panic(panic_clave_no_encontrada)
+		panic(msjPanicClaveNoEncontrada)
 	}
 	return hash.tabla[ubicacion].valor
 }
@@ -122,12 +125,12 @@ func (hash hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 }
 
 func (iter iteradorDiccionario[K, V]) HaySiguiente() bool {
-	return iter.posicion_actual < iter.capacidad && iter.tabla[iter.posicion_actual].estado == OCUPADO
+	return iter.posicion_actual < iter.capacidad
 }
 
 func (iter iteradorDiccionario[K, V]) VerActual() (K, V) {
 	if !iter.HaySiguiente() {
-		panic(iteracion_completada)
+		panic(msjPanicIteracionCompletada)
 	}
 	clave := iter.tabla[iter.posicion_actual].clave
 	valor := iter.tabla[iter.posicion_actual].valor
@@ -136,7 +139,7 @@ func (iter iteradorDiccionario[K, V]) VerActual() (K, V) {
 
 func (iter *iteradorDiccionario[K, V]) Siguiente() {
 	if !iter.HaySiguiente() {
-		panic(iteracion_completada)
+		panic(msjPanicIteracionCompletada)
 	}
 	iter.posicion_actual++
 	iter.buscarProximaPosicionOcupada()
