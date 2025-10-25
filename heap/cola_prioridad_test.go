@@ -116,13 +116,21 @@ func TestVolumen(t *testing.T) {
 	heap := TDAHeap.CrearHeap(cmpEnteros)
 	volumenes := []int{1000, 10000, 50000, 100000, 500000}
 	for _, volumen := range volumenes {
+		arr := []int{}
 		for i := 0; i < volumen; i++ {
+			arr = append(arr, i)
 			heap.Encolar(i)
 		}
 		require.EqualValues(t, volumen, heap.Cantidad())
 
 		for i := volumen - 1; i >= 0; i-- {
 			require.EqualValues(t, i, heap.Desencolar())
+		}
+		require.True(t, heap.EstaVacia())
+
+		heap_arr := TDAHeap.CrearHeapArr(arr, cmpEnteros)
+		for i := volumen - 1; i >= 0; i-- {
+			require.EqualValues(t, i, heap_arr.Desencolar())
 		}
 		require.True(t, heap.EstaVacia())
 	}
