@@ -64,7 +64,7 @@ func (h *heap[T]) Desencolar() T {
 	h.datos[0] = h.datos[h.cantidad]
 	downheap(h.datos, 0, h.cantidad, h.cmp)
 
-	if h.cantidad > 0 && h.cantidad*constFactorDecrecimiento <= len(h.datos) && len(h.datos) > constCapacidadInicial {
+	if h.cantidad*constFactorDecrecimiento <= len(h.datos) && len(h.datos) > constCapacidadInicial {
 		h.redimensionar(len(h.datos) / constFactorCrecimiento)
 	}
 	return maximo
