@@ -48,7 +48,7 @@ func (h *heap[T]) VerMax() T {
 
 func (h *heap[T]) Encolar(elem T) {
 	if h.cantidad == len(h.datos) {
-		h.redimensionar(len(h.datos) * constFactorCrecimiento)
+		h.redimensionar(max(len(h.datos), 1) * constFactorCrecimiento)
 	}
 	h.datos[h.cantidad] = elem
 	h.cantidad++
