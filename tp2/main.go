@@ -2,10 +2,14 @@ package main
 
 import (
 	algo "algogram"
+	"os"
 )
 
 func main() {
-	usuarios := algo.LeerEntradaArchivoYGuardar()
+	if len(os.Args) < 2 {
+		return
+	}
+	usuarios := algo.LeerUsuariosDesdeArchivo(os.Args[1])
 	algo.Setup(usuarios)
 
 }
