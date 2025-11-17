@@ -1,0 +1,11 @@
+go 1.25.0
+
+use (
+	//./Guia
+	./tdas
+	//./tp0
+	//./tp1
+	./tp2
+	//./dc
+	./app_algogram
+)
