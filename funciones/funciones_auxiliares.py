@@ -2,6 +2,7 @@ from collections import deque
 from tda_grafo.grafo import Grafo
 
 
+# Armamos el camino desde el destino hacia el origen siguiendo el diccionario de padres
 def reconstruir_camino(padres, origen, destino):
     actual = destino
     salida = []

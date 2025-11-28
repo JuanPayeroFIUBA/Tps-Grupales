@@ -18,7 +18,7 @@ def camino_minimo_origen_destino(origen, destino, grafo: g.Grafo):
         if v == destino:
             return reconstruir_camino(padres, origen, destino)
 
-        for w in grafo.adyacentes():
+        for w in grafo.adyacentes(v):
             if w not in visitados:
                 visitados.add(w)
                 padres[w] = v

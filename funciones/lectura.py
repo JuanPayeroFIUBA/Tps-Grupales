@@ -15,7 +15,7 @@ def orden_topologico_lectura(vertices, grafo):
     cola = deque()
     camino_topologico = []
 
-    for v in range(vertices):
+    for v in vertices:
         if g_ent[v] == 0:
             cola.append(v)
 

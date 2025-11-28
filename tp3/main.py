@@ -1,21 +1,27 @@
-from locale import atoi
+import sys
 from funciones.ciclo import obtener_ciclo
 from funciones.diametro import obtener_diametro
 from funciones.camino import camino_minimo_origen_destino
 from funciones.lectura import orden_topologico_lectura
+from funciones.rango import obtener_paginas_en_rango
+from funciones.navegacion import navegar_primer_link
+from funciones.mas_importantes import calcular_mas_importantes
 import tda_grafo.grafo as g
-
-RUTA_ARCHIVO = "wiki_parseado.txt"
 
 
 def main():
-    grafo = crear_grafo_desde_archivo(RUTA_ARCHIVO)
+    if len(sys.argv) < 2:
+        print("Uso: ./netstats <archivo_wiki>")
+        return
+    
+    ruta_archivo = sys.argv[1]
+    grafo = crear_grafo_desde_archivo(ruta_archivo)
     procesar_entradas(grafo)
     return
 
 
 def crear_grafo_desde_archivo(ruta):
-    grafo = g.Grafo(esdirigido=True)
+    grafo = g.Grafo(dirigido=True)
 
     with open(ruta, "r", encoding="utf-8") as archivo:
         for linea in archivo:
@@ -25,55 +31,118 @@ def crear_grafo_desde_archivo(ruta):
                 continue
 
             partes = linea.split("\t")
-            grafo.agregar_vertice(partes[0])
+            pagina = partes[0]
+            grafo.agregar_vertice(pagina)
 
-            for arista in partes[1:]:
-                arista = arista.strip()
-                # if arista:
-                grafo.agregar_arista(partes[0], arista)
+    with open(ruta, "r", encoding="utf-8") as archivo:
+        for linea in archivo:
+            linea = linea.strip()
+
+            if not linea:
+                continue
+
+            partes = linea.split("\t")
+            pagina = partes[0]
+
+            for link in partes[1:]:
+                link = link.strip()
+                if link and grafo.hay_vertice(link):
+                    grafo.agregar_arista(pagina, link)
+    
     return grafo
 
 
 def procesar_entradas(grafo):
-    comando = ""
-    parametros = ""
+    for linea in sys.stdin:
+        linea = linea.strip()
+        if not linea:
+            continue
+        
+        partes = linea.split(" ", 1)
+        comando = partes[0]
+        parametros = partes[1] if len(partes) > 1 else ""
 
-    # no me acuerdo como hacer para leer entrada estandar/archivos xd
+        if comando == "listar_operaciones":
+            print("camino")
+            print("lectura")
+            print("diametro")
+            print("ciclo")
+            print("rango")
+            print("navegacion")
+            print("mas_importantes")
 
-    if comando == "lista_comandos":
-        return
+        elif comando == "camino":
+            origen, destino = parametros.split(",")
+            if not grafo.hay_vertice(origen) or not grafo.hay_vertice(destino):
+                print("No se encontro recorrido")
+                continue
+            
+            camino = camino_minimo_origen_destino(origen, destino, grafo)
+            if not camino:
+                print("No se encontro recorrido")
+            else:
+                print(" -> ".join(camino))
+                print(f"Costo: {len(camino) - 1}")
 
-    elif comando == "camino":
-        origen, destino = parametros[1].split(",")
-        if origen not in grafo or destino not in grafo:
-            print("No se encontro recorrido")
-        camino = camino_minimo_origen_destino(origen, destino, grafo)
-        if not camino:
-            print("No se encontro recorrido")
-        else:
+        elif comando == "lectura":
+            paginas = parametros.split(",")
+            vertices = set(paginas)
+            
+            camino = orden_topologico_lectura(vertices, grafo)
+            if not camino:
+                print("No existe forma de leer las paginas en orden")
+            else:
+                print(", ".join(camino))
+
+        elif comando == "diametro":
+            camino, diametro = obtener_diametro(grafo)
             print(" -> ".join(camino))
-            print(f"Costo: {len(camino) - 1}")
+            print(f"Costo: {diametro}")
 
-    elif comando == "lectura":
-        vertices = set(parametros[1].split(","))
-        # podriamos chequear que todas las paginas esten en el grafo
-        camino = orden_topologico_lectura(vertices, grafo)
-        if not camino:
-            print("No existe forma de leer las paginas en orden")
-        else:
-            print(", ".join(camino))
+        elif comando == "ciclo":
+            partes_ciclo = parametros.split(",")
+            origen = partes_ciclo[0]
+            largo = int(partes_ciclo[1])
+            
+            if not grafo.hay_vertice(origen):
+                print("No se encontro recorrido")
+                continue
+            
+            ciclo = obtener_ciclo(origen, largo, grafo)
 
-    elif comando == "diametro":
-        camino, diametro = obtener_diametro(grafo)
-        print(" -> ".join(camino))
-        print(f"Costo: {diametro}")
+            if not ciclo:
+                print("No se encontro recorrido")
+            else:
+                print(" -> ".join(ciclo))
+        
+        elif comando == "rango":
+            partes_rango = parametros.split(",")
+            pagina = partes_rango[0]
+            n = int(partes_rango[1])
+            
+            if not grafo.hay_vertice(pagina):
+                print("0")
+                continue
+            
+            cantidad = obtener_paginas_en_rango(pagina, n, grafo)
+            print(cantidad)
+        
+        elif comando == "navegacion":
+            pagina_origen = parametros.strip()
+            
+            if not grafo.hay_vertice(pagina_origen):
+                print(pagina_origen)
+                continue
+            
+            recorrido = navegar_primer_link(pagina_origen, grafo)
+            print(" -> ".join(recorrido))
+        
+        elif comando == "mas_importantes":
+            n = int(parametros.strip()) if parametros else 20
+            
+            paginas_importantes = calcular_mas_importantes(n, grafo)
+            print(", ".join(paginas_importantes))
 
-    elif comando == "ciclo":
-        origen, largo_str = parametros[1].split(",")
-        largo = int(largo_str)
-        ciclo = obtener_ciclo(origen, largo, grafo)
 
-        if not ciclo:
-            print("No se encontro recorrido")
-        else:
-            print(" -> ".join(ciclo))
+if __name__ == "__main__":
+    main()

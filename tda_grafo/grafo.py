@@ -5,7 +5,7 @@ import random
 class Grafo:
     def __init__(self, dirigido: bool = False):
         self.esdirigido = dirigido
-        self.lista_adyacencia = Dict[Any, Dict[Any, float]] = {}
+        self.lista_adyacencia = {}
 
     def agregar_vertice(self, v):
         if v not in self.lista_adyacencia:
