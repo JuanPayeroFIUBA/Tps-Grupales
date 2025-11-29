@@ -23,7 +23,7 @@ class Grafo:
         if self.esdirigido:
             for vertice in list(self.lista_adyacencia.keys()):
                 if a_borrar in self.lista_adyacencia[vertice]:
-                    del self.lista_adyacencia[vertice, a_borrar]
+                    del self.lista_adyacencia[vertice][a_borrar]
         else:
             for vecino in list(self.lista_adyacencia[a_borrar].keys()):
                 if vecino in self.lista_adyacencia:
@@ -41,9 +41,9 @@ class Grafo:
     def borrar_arista(self, v, w):
         if not self.estan_unidos(v, w):
             raise (PANIC_ARISTA_INEXISTENTE)
-        del self.lista_adyacencia[v, w]
+        del self.lista_adyacencia[v][w]
         if not self.esdirigido:
-            del self.lista_adyacencia[w, v]
+            del self.lista_adyacencia[w][v]
 
     def estan_unidos(self, v, w):
         return v in self.lista_adyacencia and w in self.lista_adyacencia[v]
@@ -63,9 +63,9 @@ class Grafo:
         if v not in self.lista_adyacencia:
             raise (PANIC_VERTICE_INEXISTENTE)
 
-        return list(self.lista_adyacencia.get(v, {}))
+        return list(self.lista_adyacencia[v].keys())
 
     def vertice_aleatorio(self):
         if not self.lista_adyacencia:
             raise (PANIC_GRAFO_VACIO)
-        return random.choice(self.lista_adyacencia.keys())
+        return random.choice(list(self.lista_adyacencia.keys()))

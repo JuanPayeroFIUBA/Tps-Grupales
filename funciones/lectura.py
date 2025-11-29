@@ -6,7 +6,8 @@ from funciones.funciones_auxiliares import (
 from tda_grafo.grafo import Grafo
 
 
-def orden_topologico_lectura(vertices, grafo):
+# Funcion que ejecuta el comando "lectura" haciendo uso de un algoritmo de orden Topologico, este permite obtener un orden en el que es válido leer las páginas indicadas.Para esto se crea un subgrafo con las paginas indicadas solamente y con las aristas invertidas, de modo que el orden para recorrer las paginas sea el correcto usando Orden Topologico
+def orden_topologico_lectura(vertices, grafo: Grafo):
     nuevo = crear_subgrafo(vertices, grafo)
     if nuevo is None:
         return None

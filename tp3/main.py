@@ -23,6 +23,7 @@ COMANDO_NAVEGACION = "navegación"
 
 ERROR_CAMINO_NO_ENCONTRADO = "No se encontro recorrido"
 ERROR_LECTURA = "No existe forma de leer las paginas en orden"
+ERROR_COMANDO_INVALIDO = "Comando invalido"
 
 
 def main():
@@ -36,6 +37,7 @@ def main():
     return
 
 
+# Funcion encargada de crear un TDA grafo a partir del archivo pasado por args,para asi poder ejecutar los comandos del programa
 def crear_grafo_desde_archivo(ruta):
     grafo = g.Grafo(dirigido=True)
 
@@ -68,6 +70,7 @@ def crear_grafo_desde_archivo(ruta):
     return grafo
 
 
+# Funcion encargada de procesar la informacion ingresada por entrada estandar y desglosar el comando en cuestion, y los parametros de este, para luego procesar el comando y llamar a la funcionalidad correspondiente
 def procesar_entradas(grafo):
     for linea in sys.stdin:
         linea = linea.strip()
@@ -152,6 +155,8 @@ def procesar_entradas(grafo):
 
             paginas_importantes = calcular_mas_importantes(n, grafo)
             print(", ".join(paginas_importantes))
+        else:
+            print(ERROR_COMANDO_INVALIDO)
 
 
 if __name__ == "__main__":
