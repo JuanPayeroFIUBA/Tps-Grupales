@@ -8,12 +8,28 @@ from funciones.navegacion import navegar_primer_link
 from funciones.mas_importantes import calcular_mas_importantes
 import tda_grafo.grafo as g
 
+COMANDO_LISTAR = "listar_operaciones"
+LISTA_COMANDOS = (
+    "camino \nmas_importantes \nciclo \nlectura \ndiametro \nrango \nnavegación"
+)
+
+COMANDO_CAMINO = "camino"
+COMANDO_MAS_IMPORTANTES = "mas_importantes"
+COMANDO_CICLOS = "ciclo"
+COMANDO_LECTURA = "lectura"
+COMANDO_DIAMETRO = "diametro"
+COMANDO_RANGO = "rango"
+COMANDO_NAVEGACION = "navegación"
+
+ERROR_CAMINO_NO_ENCONTRADO = "No se encontro recorrido"
+ERROR_LECTURA = "No existe forma de leer las paginas en orden"
+
 
 def main():
     if len(sys.argv) < 2:
         print("Uso: ./netstats <archivo_wiki>")
         return
-    
+
     ruta_archivo = sys.argv[1]
     grafo = crear_grafo_desde_archivo(ruta_archivo)
     procesar_entradas(grafo)
@@ -48,7 +64,7 @@ def crear_grafo_desde_archivo(ruta):
                 link = link.strip()
                 if link and grafo.hay_vertice(link):
                     grafo.agregar_arista(pagina, link)
-    
+
     return grafo
 
 
@@ -57,89 +73,83 @@ def procesar_entradas(grafo):
         linea = linea.strip()
         if not linea:
             continue
-        
+
         partes = linea.split(" ", 1)
         comando = partes[0]
         parametros = partes[1] if len(partes) > 1 else ""
 
-        if comando == "listar_operaciones":
-            print("camino")
-            print("lectura")
-            print("diametro")
-            print("ciclo")
-            print("rango")
-            print("navegacion")
-            print("mas_importantes")
+        if comando == COMANDO_LISTAR:
+            print(LISTA_COMANDOS)
 
-        elif comando == "camino":
+        elif comando == COMANDO_CAMINO:
             origen, destino = parametros.split(",")
             if not grafo.hay_vertice(origen) or not grafo.hay_vertice(destino):
-                print("No se encontro recorrido")
+                print(ERROR_CAMINO_NO_ENCONTRADO)
                 continue
-            
+
             camino = camino_minimo_origen_destino(origen, destino, grafo)
             if not camino:
-                print("No se encontro recorrido")
+                print(ERROR_CAMINO_NO_ENCONTRADO)
             else:
                 print(" -> ".join(camino))
                 print(f"Costo: {len(camino) - 1}")
 
-        elif comando == "lectura":
+        elif comando == COMANDO_LECTURA:
             paginas = parametros.split(",")
             vertices = set(paginas)
-            
+
             camino = orden_topologico_lectura(vertices, grafo)
             if not camino:
-                print("No existe forma de leer las paginas en orden")
+                print(ERROR_LECTURA)
             else:
                 print(", ".join(camino))
 
-        elif comando == "diametro":
+        elif comando == COMANDO_DIAMETRO:
             camino, diametro = obtener_diametro(grafo)
             print(" -> ".join(camino))
             print(f"Costo: {diametro}")
 
-        elif comando == "ciclo":
+        elif comando == COMANDO_CICLOS:
             partes_ciclo = parametros.split(",")
             origen = partes_ciclo[0]
             largo = int(partes_ciclo[1])
-            
+
             if not grafo.hay_vertice(origen):
-                print("No se encontro recorrido")
+                print(ERROR_CAMINO_NO_ENCONTRADO)
                 continue
-            
+
             ciclo = obtener_ciclo(origen, largo, grafo)
 
             if not ciclo:
-                print("No se encontro recorrido")
+                print(ERROR_CAMINO_NO_ENCONTRADO)
             else:
                 print(" -> ".join(ciclo))
-        
-        elif comando == "rango":
+
+        elif comando == COMANDO_RANGO:
             partes_rango = parametros.split(",")
             pagina = partes_rango[0]
             n = int(partes_rango[1])
-            
+
             if not grafo.hay_vertice(pagina):
                 print("0")
                 continue
-            
+
             cantidad = obtener_paginas_en_rango(pagina, n, grafo)
             print(cantidad)
-        
-        elif comando == "navegacion":
+
+        elif comando == COMANDO_NAVEGACION:
             pagina_origen = parametros.strip()
-            
+
             if not grafo.hay_vertice(pagina_origen):
                 print(pagina_origen)
                 continue
-            
+
             recorrido = navegar_primer_link(pagina_origen, grafo)
             print(" -> ".join(recorrido))
-        
-        elif comando == "mas_importantes":
+
+        elif comando == COMANDO_MAS_IMPORTANTES:
             n = int(parametros.strip()) if parametros else 20
-            
+
             paginas_importantes = calcular_mas_importantes(n, grafo)
             print(", ".join(paginas_importantes))
 

@@ -1,6 +1,11 @@
 from typing import Dict, Any
 import random
 
+PANIC_VERTICE_INEXISTENTE = "El Vertice no existe"
+PANIC_VERTICES_INEXISTENTES = "Alguno de los Vertices no existe"
+PANIC_ARISTA_INEXISTENTE = "La arista no existe"
+PANIC_GRAFO_VACIO = "Aun no ha Vertices"
+
 
 class Grafo:
     def __init__(self, dirigido: bool = False):
@@ -13,7 +18,7 @@ class Grafo:
 
     def borrar_vertice(self, a_borrar):
         if a_borrar not in self.lista_adyacencia:
-            raise ("El Vertice no existe")
+            raise (PANIC_VERTICE_INEXISTENTE)
 
         if self.esdirigido:
             for vertice in list(self.lista_adyacencia.keys()):
@@ -27,7 +32,7 @@ class Grafo:
 
     def agregar_arista(self, v, w, peso: float = 1.0):
         if v not in self.lista_adyacencia or w not in self.lista_adyacencia:
-            raise ("Alguno de los Vertices no existe")
+            raise (PANIC_VERTICES_INEXISTENTES)
         self.lista_adyacencia[v][w] = peso
 
         if not self.esdirigido:
@@ -35,7 +40,7 @@ class Grafo:
 
     def borrar_arista(self, v, w):
         if not self.estan_unidos(v, w):
-            raise ("La arista no existe")
+            raise (PANIC_ARISTA_INEXISTENTE)
         del self.lista_adyacencia[v, w]
         if not self.esdirigido:
             del self.lista_adyacencia[w, v]
@@ -45,7 +50,7 @@ class Grafo:
 
     def peso_arista(self, v, w):
         if not self.estan_unidos(v, w):
-            raise ("La arista no existe")
+            raise (PANIC_ARISTA_INEXISTENTE)
         return self.lista_adyacencia[v][w]
 
     def obtener_vertices(self):
@@ -56,11 +61,11 @@ class Grafo:
 
     def adyacentes(self, v):
         if v not in self.lista_adyacencia:
-            raise ("El Vertice no existe")
+            raise (PANIC_VERTICE_INEXISTENTE)
 
         return list(self.lista_adyacencia.get(v, {}))
 
     def vertice_aleatorio(self):
         if not self.lista_adyacencia:
-            raise ("Aun no ha Vertices")
+            raise (PANIC_GRAFO_VACIO)
         return random.choice(self.lista_adyacencia.keys())
