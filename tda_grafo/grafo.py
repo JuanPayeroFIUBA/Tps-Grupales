@@ -69,3 +69,6 @@ class Grafo:
         if not self.lista_adyacencia:
             raise (PANIC_GRAFO_VACIO)
         return random.choice(list(self.lista_adyacencia.keys()))
+
+    def __len__(self):
+        return len(self.lista_adyacencia)

@@ -1,7 +1,5 @@
 from tda_grafo.grafo import Grafo
 
-
-# Funcion que ejecuta el comando "navegación", que navega desde una página siguiendo siempre el primer link disponible y se para cuando no hay más links, se completan 20 páginas o hay un ciclo
 def navegar_primer_link(origen, grafo: Grafo):
     recorrido = [origen]
     visitados = set()
@@ -16,12 +14,11 @@ def navegar_primer_link(origen, grafo: Grafo):
             break
 
         primer_link = adyacentes[0]
+        recorrido.append(primer_link)
 
         if primer_link in visitados:
-            recorrido.append(primer_link)
             break
 
-        recorrido.append(primer_link)
         visitados.add(primer_link)
         pagina_actual = primer_link
 

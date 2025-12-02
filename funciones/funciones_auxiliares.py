@@ -2,7 +2,8 @@ from collections import deque
 from tda_grafo.grafo import Grafo
 
 
-# Funcion Auxiliar encargada de reconstuir el camino entre dos vertices a traves de un diccionario de padres
+# Funcion auxiliar para reconstuir el camino entre dos vertices
+# a traves de un diccionario de padres
 def reconstruir_camino(padres, origen, destino):
     actual = destino
     salida = []
@@ -15,7 +16,8 @@ def reconstruir_camino(padres, origen, destino):
     return salida
 
 
-# Funcion Auxiliar encargada de obtener los grados de entrada de un grafo y almacenando los adyacentes de cada vertice
+# Funcion auxiliar para obtener los grados de entrada de un grafo
+# y almacenando los adyacentes de cada vertice
 def obtener_grados_de_entrada_subgrafo(vertices, grafo: Grafo):
     grados_ent = {}
     adyacentes = {}
@@ -31,7 +33,8 @@ def obtener_grados_de_entrada_subgrafo(vertices, grafo: Grafo):
     return grados_ent, adyacentes
 
 
-# Funcion que crea un subgrafo que tiene parte de los vertices del pasado por parametro, y las aristas de estos invertidas
+# Funcion que crea un subgrafo que tiene parte de los vertices del
+# pasado por parametro, y las aristas de estos invertidas
 def crear_subgrafo(vertices, grafo: Grafo):
     nuevo = Grafo(True)
 
@@ -47,14 +50,16 @@ def crear_subgrafo(vertices, grafo: Grafo):
     return nuevo
 
 
-# Funcion que encuentra el camino minimo (por BFS) desde un vertice hasta todos los demas del grafo, retornando el camino al vertice mas lejano (reconstruido a partir de un diccionario de padres) y su distancia
+# Funcion que encuentra el camino minimo por BFS desde un vertice
+# hasta todos los demas del grafo. Retorna el camino al vertice mas lejano
+# (reconstruido a partir de un diccionario de padres) y su distancia
 def camino_minimo_grafo(origen, grafo: Grafo):
     cola = deque()
     padres = {}
     visitados = set()
     orden = {}
-    maximo_orden_encolado = 0  # la distancia minima maxima hasta ahora
-    maximo_vertice = ""
+    maximo_orden_encolado = 0
+    maximo_vertice = origen
 
     cola.append(origen)
 
@@ -76,10 +81,14 @@ def camino_minimo_grafo(origen, grafo: Grafo):
                     maximo_orden_encolado = orden[w]
                     maximo_vertice = w
 
+    if maximo_vertice == origen:
+        return [origen], 0
     return reconstruir_camino(padres, origen, maximo_vertice), maximo_orden_encolado
 
 
-# Funcion que realiza un recorrido DFS sobre un grafo, en busca de ciclos de una longitud pasada por parametro, y guardando el recorrido en un diccionario de vertices, si no hubiera tal recorrido de ese largo, se retornaria None
+# Funcion que hace un recorrido DFS sobre un grafo para buscar
+# ciclos de una longitud pasada por parametro. Se guarda el recorrido
+# en un diccionario de vertices. Caso contrario se retornaria None
 def dfs_ciclo(origen, actual, largo, recorrido, visitados, grafo: Grafo):
     if len(recorrido) == largo:
         if origen in grafo.adyacentes(actual):

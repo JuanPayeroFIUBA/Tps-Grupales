@@ -1,9 +1,12 @@
-from funciones_auxiliares import reconstruir_camino
+from funciones.funciones_auxiliares import reconstruir_camino
 from tda_grafo.grafo import Grafo
 from collections import deque
 
 
-# Funcion encargada de ejecutar el comando "camino" que imprime una lista con las páginas con los cuales navegamos de la página origen a la página destino, navegando lo menos posible, para lo cual realiza un recorrido BFS para encontrar el camino minimo
+# Funcion encargada de ejecutar el comando "camino"
+# que imprime una lista con las páginas con los cuales
+# navegamos de la página origen a la página destino, navegando lo menos posible,
+# para lo cual realiza un recorrido BFS para encontrar el camino minimo
 def camino_minimo_origen_destino(origen, destino, grafo: Grafo):
     cola = deque()
     padres = {}

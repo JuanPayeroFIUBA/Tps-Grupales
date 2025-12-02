@@ -1,8 +1,6 @@
 from collections import deque
 from tda_grafo.grafo import Grafo
 
-
-# Funcion que eecuta el comando "rango", que cuenta cuantas paginas estan a n saltos desde la pagina que se pasa como parametro. Usa BFS para contar solo las del nivel n
 def obtener_paginas_en_rango(pagina, n, grafo: Grafo):
     cola = deque()
     visitados = set()

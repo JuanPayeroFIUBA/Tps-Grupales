@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 from funciones.ciclo import obtener_ciclo
 from funciones.diametro import obtener_diametro
@@ -5,21 +6,19 @@ from funciones.camino import camino_minimo_origen_destino
 from funciones.lectura import orden_topologico_lectura
 from funciones.rango import obtener_paginas_en_rango
 from funciones.navegacion import navegar_primer_link
-from funciones.mas_importantes import calcular_mas_importantes
 import tda_grafo.grafo as g
 
 COMANDO_LISTAR = "listar_operaciones"
 LISTA_COMANDOS = (
-    "camino \nmas_importantes \nciclo \nlectura \ndiametro \nrango \nnavegación"
+    "camino \nciclo \nlectura \ndiametro \nrango \nnavegacion"
 )
 
 COMANDO_CAMINO = "camino"
-COMANDO_MAS_IMPORTANTES = "mas_importantes"
 COMANDO_CICLOS = "ciclo"
 COMANDO_LECTURA = "lectura"
 COMANDO_DIAMETRO = "diametro"
 COMANDO_RANGO = "rango"
-COMANDO_NAVEGACION = "navegación"
+COMANDO_NAVEGACION = "navegacion"
 
 ERROR_CAMINO_NO_ENCONTRADO = "No se encontro recorrido"
 ERROR_LECTURA = "No existe forma de leer las paginas en orden"
@@ -37,7 +36,6 @@ def main():
     return
 
 
-# Funcion encargada de crear un TDA grafo a partir del archivo pasado por args,para asi poder ejecutar los comandos del programa
 def crear_grafo_desde_archivo(ruta):
     grafo = g.Grafo(dirigido=True)
 
@@ -70,7 +68,6 @@ def crear_grafo_desde_archivo(ruta):
     return grafo
 
 
-# Funcion encargada de procesar la informacion ingresada por entrada estandar y desglosar el comando en cuestion, y los parametros de este, para luego procesar el comando y llamar a la funcionalidad correspondiente
 def procesar_entradas(grafo):
     for linea in sys.stdin:
         linea = linea.strip()
@@ -150,11 +147,7 @@ def procesar_entradas(grafo):
             recorrido = navegar_primer_link(pagina_origen, grafo)
             print(" -> ".join(recorrido))
 
-        elif comando == COMANDO_MAS_IMPORTANTES:
-            n = int(parametros.strip()) if parametros else 20
-
-            paginas_importantes = calcular_mas_importantes(n, grafo)
-            print(", ".join(paginas_importantes))
+        
         else:
             print(ERROR_COMANDO_INVALIDO)
 
