@@ -9,10 +9,6 @@ from funciones.navegacion import navegar_primer_link
 import tda_grafo.grafo as g
 
 COMANDO_LISTAR = "listar_operaciones"
-LISTA_COMANDOS = (
-    "camino \nciclo \nlectura \ndiametro \nrango \nnavegacion"
-)
-
 COMANDO_CAMINO = "camino"
 COMANDO_CICLOS = "ciclo"
 COMANDO_LECTURA = "lectura"
@@ -20,9 +16,25 @@ COMANDO_DIAMETRO = "diametro"
 COMANDO_RANGO = "rango"
 COMANDO_NAVEGACION = "navegacion"
 
+LISTA_COMANDOS = f"""
+{COMANDO_CAMINO}
+{COMANDO_CICLOS}
+{COMANDO_LECTURA}
+{COMANDO_DIAMETRO}
+{COMANDO_RANGO}
+{COMANDO_NAVEGACION}
+""".strip()
+
 ERROR_CAMINO_NO_ENCONTRADO = "No se encontro recorrido"
 ERROR_LECTURA = "No existe forma de leer las paginas en orden"
 ERROR_COMANDO_INVALIDO = "Comando invalido"
+
+
+def procesar_salida(error_por_pantalla, salida_por_pantalla, datos):
+    if not datos:
+        print(error_por_pantalla)
+    else:
+        print(salida_por_pantalla)
 
 
 def main():
@@ -41,34 +53,23 @@ def crear_grafo_desde_archivo(ruta):
 
     with open(ruta, "r", encoding="utf-8") as archivo:
         for linea in archivo:
-            linea = linea.strip()
-
-            if not linea:
+            partes = linea.rstrip("\n").split("\t")
+            if not partes:
                 continue
-
-            partes = linea.split("\t")
             pagina = partes[0]
             grafo.agregar_vertice(pagina)
 
-    with open(ruta, "r", encoding="utf-8") as archivo:
-        for linea in archivo:
-            linea = linea.strip()
-
-            if not linea:
-                continue
-
-            partes = linea.split("\t")
-            pagina = partes[0]
-
             for link in partes[1:]:
                 link = link.strip()
-                if link and grafo.hay_vertice(link):
-                    grafo.agregar_arista(pagina, link)
+                if not link:
+                    continue
+                grafo.agregar_vertice(link)
+                grafo.agregar_arista(pagina, link)
 
     return grafo
 
 
-def procesar_entradas(grafo):
+def procesar_entradas(grafo: g.Grafo):
     for linea in sys.stdin:
         linea = linea.strip()
         if not linea:
@@ -83,26 +84,29 @@ def procesar_entradas(grafo):
 
         elif comando == COMANDO_CAMINO:
             origen, destino = parametros.split(",")
-            if not grafo.hay_vertice(origen) or not grafo.hay_vertice(destino):
-                print(ERROR_CAMINO_NO_ENCONTRADO)
-                continue
 
             camino = camino_minimo_origen_destino(origen, destino, grafo)
-            if not camino:
-                print(ERROR_CAMINO_NO_ENCONTRADO)
-            else:
-                print(" -> ".join(camino))
-                print(f"Costo: {len(camino) - 1}")
+            # if not camino:
+            #    print(ERROR_CAMINO_NO_ENCONTRADO)
+            # else:
+            #    print(" -> ".join(camino))
+            #    print(f"Costo: {len(camino) - 1}")
+            procesar_salida(
+                ERROR_CAMINO_NO_ENCONTRADO,
+                " -> ".join(camino) + f"\nCosto: {len(camino)-1}",
+                camino,
+            )
 
         elif comando == COMANDO_LECTURA:
             paginas = parametros.split(",")
             vertices = set(paginas)
 
             camino = orden_topologico_lectura(vertices, grafo)
-            if not camino:
-                print(ERROR_LECTURA)
-            else:
-                print(", ".join(camino))
+            # if not camino:
+            #    print(ERROR_LECTURA)
+            # else:
+            #    print(", ".join(camino))
+            procesar_salida(ERROR_LECTURA, f", ".join(camino), camino)
 
         elif comando == COMANDO_DIAMETRO:
             camino, diametro = obtener_diametro(grafo)
@@ -114,23 +118,24 @@ def procesar_entradas(grafo):
             origen = partes_ciclo[0]
             largo = int(partes_ciclo[1])
 
-            if not grafo.hay_vertice(origen):
+            if not grafo.existe_vertice(origen):
                 print(ERROR_CAMINO_NO_ENCONTRADO)
                 continue
 
             ciclo = obtener_ciclo(origen, largo, grafo)
 
-            if not ciclo:
-                print(ERROR_CAMINO_NO_ENCONTRADO)
-            else:
-                print(" -> ".join(ciclo))
+            # if not ciclo:
+            #    print(ERROR_CAMINO_NO_ENCONTRADO)
+            # else:
+            #    print(" -> ".join(ciclo))
+            procesar_salida(ERROR_CAMINO_NO_ENCONTRADO, " -> ".join(ciclo), ciclo)
 
         elif comando == COMANDO_RANGO:
             partes_rango = parametros.split(",")
             pagina = partes_rango[0]
             n = int(partes_rango[1])
 
-            if not grafo.hay_vertice(pagina):
+            if not grafo.existe_vertice(pagina):
                 print("0")
                 continue
 
@@ -140,14 +145,13 @@ def procesar_entradas(grafo):
         elif comando == COMANDO_NAVEGACION:
             pagina_origen = parametros.strip()
 
-            if not grafo.hay_vertice(pagina_origen):
+            if not grafo.existe_vertice(pagina_origen):
                 print(pagina_origen)
                 continue
 
             recorrido = navegar_primer_link(pagina_origen, grafo)
             print(" -> ".join(recorrido))
 
-        
         else:
             print(ERROR_COMANDO_INVALIDO)
 

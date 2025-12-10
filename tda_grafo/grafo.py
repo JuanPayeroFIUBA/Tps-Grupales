@@ -1,10 +1,10 @@
-from typing import Dict, Any
 import random
+from typing import Any
 
-PANIC_VERTICE_INEXISTENTE = "El Vertice no existe"
-PANIC_VERTICES_INEXISTENTES = "Alguno de los Vertices no existe"
-PANIC_ARISTA_INEXISTENTE = "La arista no existe"
-PANIC_GRAFO_VACIO = "Aun no ha Vertices"
+MSJ_ERROR_VERTICE_INEXISTENTE = "El Vertice no existe"
+MSJ_ERROR_VERTICES_INEXISTENTES = "Alguno de los Vertices no existe"
+MSJ_ERROR_ARISTA_INEXISTENTE = "La arista no existe"
+MSJ_ERROR_GRAFO_VACIO = "Aun no hay Vertices"
 
 
 class Grafo:
@@ -16,23 +16,17 @@ class Grafo:
         if v not in self.lista_adyacencia:
             self.lista_adyacencia[v] = {}
 
-    def borrar_vertice(self, a_borrar):
-        if a_borrar not in self.lista_adyacencia:
-            raise (PANIC_VERTICE_INEXISTENTE)
+    def borrar_vertice(self, v):
+        if v not in self.lista_adyacencia:
+            raise Exception(MSJ_ERROR_VERTICE_INEXISTENTE)
 
-        if self.esdirigido:
-            for vertice in list(self.lista_adyacencia.keys()):
-                if a_borrar in self.lista_adyacencia[vertice]:
-                    del self.lista_adyacencia[vertice][a_borrar]
-        else:
-            for vecino in list(self.lista_adyacencia[a_borrar].keys()):
-                if vecino in self.lista_adyacencia:
-                    self.lista_adyacencia[vecino].pop(a_borrar, None)
-        del self.lista_adyacencia[a_borrar]
+        for vertice in self.lista_adyacencia:
+            self.lista_adyacencia[vertice].pop(v, None)
+        del self.lista_adyacencia[v]
 
-    def agregar_arista(self, v, w, peso: float = 1.0):
+    def agregar_arista(self, v, w, peso: Any = 1):
         if v not in self.lista_adyacencia or w not in self.lista_adyacencia:
-            raise (PANIC_VERTICES_INEXISTENTES)
+            raise Exception(MSJ_ERROR_VERTICES_INEXISTENTES)
         self.lista_adyacencia[v][w] = peso
 
         if not self.esdirigido:
@@ -40,7 +34,7 @@ class Grafo:
 
     def borrar_arista(self, v, w):
         if not self.estan_unidos(v, w):
-            raise (PANIC_ARISTA_INEXISTENTE)
+            raise Exception(MSJ_ERROR_ARISTA_INEXISTENTE)
         del self.lista_adyacencia[v][w]
         if not self.esdirigido:
             del self.lista_adyacencia[w][v]
@@ -50,24 +44,24 @@ class Grafo:
 
     def peso_arista(self, v, w):
         if not self.estan_unidos(v, w):
-            raise (PANIC_ARISTA_INEXISTENTE)
+            raise Exception(MSJ_ERROR_ARISTA_INEXISTENTE)
         return self.lista_adyacencia[v][w]
 
     def obtener_vertices(self):
         return list(self.lista_adyacencia.keys())
 
-    def hay_vertice(self, v):
+    def existe_vertice(self, v):
         return v in self.lista_adyacencia
 
     def adyacentes(self, v):
         if v not in self.lista_adyacencia:
-            raise (PANIC_VERTICE_INEXISTENTE)
+            raise Exception(MSJ_ERROR_VERTICE_INEXISTENTE)
 
         return list(self.lista_adyacencia[v].keys())
 
     def vertice_aleatorio(self):
         if not self.lista_adyacencia:
-            raise (PANIC_GRAFO_VACIO)
+            raise Exception(MSJ_ERROR_GRAFO_VACIO)
         return random.choice(list(self.lista_adyacencia.keys()))
 
     def __len__(self):

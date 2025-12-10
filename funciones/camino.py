@@ -8,6 +8,8 @@ from collections import deque
 # navegamos de la página origen a la página destino, navegando lo menos posible,
 # para lo cual realiza un recorrido BFS para encontrar el camino minimo
 def camino_minimo_origen_destino(origen, destino, grafo: Grafo):
+    if not grafo.existe_vertice(origen) or not grafo.existe_vertice(destino):
+        return None
     cola = deque()
     padres = {}
     visitados = set()
