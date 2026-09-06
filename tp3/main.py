@@ -30,11 +30,13 @@ ERROR_LECTURA = "No existe forma de leer las paginas en orden"
 ERROR_COMANDO_INVALIDO = "Comando invalido"
 
 
-def procesar_salida(error_por_pantalla, salida_por_pantalla, datos):
+def procesar_salida(error_por_pantalla, datos, hay_que_imprimir_costo=False):
     if not datos:
         print(error_por_pantalla)
     else:
-        print(salida_por_pantalla)
+        print(" -> ".join(datos))
+        if hay_que_imprimir_costo:
+            print(f"Costo: {len(datos) - 1}")
 
 
 def main():
@@ -56,6 +58,7 @@ def crear_grafo_desde_archivo(ruta):
             partes = linea.rstrip("\n").split("\t")
             if not partes:
                 continue
+
             pagina = partes[0]
             grafo.agregar_vertice(pagina)
 
@@ -63,6 +66,7 @@ def crear_grafo_desde_archivo(ruta):
                 link = link.strip()
                 if not link:
                     continue
+
                 grafo.agregar_vertice(link)
                 grafo.agregar_arista(pagina, link)
 
@@ -86,27 +90,14 @@ def procesar_entradas(grafo: g.Grafo):
             origen, destino = parametros.split(",")
 
             camino = camino_minimo_origen_destino(origen, destino, grafo)
-            # if not camino:
-            #    print(ERROR_CAMINO_NO_ENCONTRADO)
-            # else:
-            #    print(" -> ".join(camino))
-            #    print(f"Costo: {len(camino) - 1}")
-            procesar_salida(
-                ERROR_CAMINO_NO_ENCONTRADO,
-                " -> ".join(camino) + f"\nCosto: {len(camino)-1}",
-                camino,
-            )
+            procesar_salida(ERROR_CAMINO_NO_ENCONTRADO, camino, True)
 
         elif comando == COMANDO_LECTURA:
             paginas = parametros.split(",")
             vertices = set(paginas)
 
             camino = orden_topologico_lectura(vertices, grafo)
-            # if not camino:
-            #    print(ERROR_LECTURA)
-            # else:
-            #    print(", ".join(camino))
-            procesar_salida(ERROR_LECTURA, f", ".join(camino), camino)
+            procesar_salida(ERROR_LECTURA, camino)
 
         elif comando == COMANDO_DIAMETRO:
             camino, diametro = obtener_diametro(grafo)
@@ -124,11 +115,7 @@ def procesar_entradas(grafo: g.Grafo):
 
             ciclo = obtener_ciclo(origen, largo, grafo)
 
-            # if not ciclo:
-            #    print(ERROR_CAMINO_NO_ENCONTRADO)
-            # else:
-            #    print(" -> ".join(ciclo))
-            procesar_salida(ERROR_CAMINO_NO_ENCONTRADO, " -> ".join(ciclo), ciclo)
+            procesar_salida(ERROR_CAMINO_NO_ENCONTRADO, ciclo)
 
         elif comando == COMANDO_RANGO:
             partes_rango = parametros.split(",")

@@ -1,12 +1,12 @@
 from collections import deque
 from tda_grafo.grafo import Grafo
 
+
 def obtener_paginas_en_rango(pagina, n, grafo: Grafo):
     cola = deque()
     visitados = set()
     distancias = {}
 
-    cola.append(pagina)
     visitados.add(pagina)
     distancias[pagina] = 0
 

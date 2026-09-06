@@ -39,7 +39,7 @@ def crear_subgrafo(vertices, grafo: Grafo):
     nuevo = Grafo(True)
 
     for v in vertices:
-        if not grafo.hay_vertice(v):
+        if not grafo.existe_vertice(v):
             return None
         nuevo.agregar_vertice(v)
 
@@ -56,7 +56,7 @@ def crear_subgrafo(vertices, grafo: Grafo):
 def camino_minimo_grafo(origen, grafo: Grafo):
     cola = deque()
     padres = {}
-    visitados = set()
+    visitados = {}
     orden = {}
     maximo_orden_encolado = 0
     maximo_vertice = origen
@@ -71,8 +71,8 @@ def camino_minimo_grafo(origen, grafo: Grafo):
         v = cola.popleft()
 
         for w in grafo.adyacentes(v):
-            if w not in visitados:
-                visitados.add(w)
+            if not visitados[w]:
+                visitados[w] = True
                 padres[w] = v
                 cola.append(w)
                 orden[w] = orden[v] + 1
